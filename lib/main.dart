@@ -2,23 +2,31 @@ import 'package:currency_converter/routes/welcome.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const CurrecnyConverter());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class CurrecnyConverter extends StatelessWidget {
+  const CurrecnyConverter({super.key});
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Currency Converter',
-      theme: ThemeData(backgroundColor: Colors.white, canvasColor: Colors.white, scaffoldBackgroundColor: Colors.white),
-      home: WelcomeRoute(),
+      theme: ThemeData(
+          elevatedButtonTheme: ElevatedButtonThemeData(
+            style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(Colors.green),
+                foregroundColor: MaterialStateProperty.all(Colors.white70)),
+          ),
+          backgroundColor: const Color.fromARGB(255, 82, 4, 75),
+          // canvasColor: const Color.fromARGB(255, 32, 79, 18),
+          scaffoldBackgroundColor: const Color.fromARGB(172, 72, 4, 74)),
+      home: const WelcomeRoute(),
     );
   }
 }
-
+/*
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
@@ -102,4 +110,4 @@ class _MyHomePageState extends State<MyHomePage> {
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
-}
+}*/
