@@ -17,11 +17,11 @@ class WelcomeRoute extends StatelessWidget {
           // centerTitle: true,
           backgroundColor: const Color.fromARGB(255, 84, 2, 66)),
       body: Container(
-        padding: EdgeInsets.all(20.0),
-        margin: EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(20.0),
+        margin: const EdgeInsets.all(20.0),
         decoration: ShapeDecoration(
           shape: Border.all(),
-          color: Color.fromARGB(172, 72, 4, 74),
+          color: const Color.fromARGB(172, 72, 4, 74),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
