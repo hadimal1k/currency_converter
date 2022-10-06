@@ -1,5 +1,7 @@
 import 'dart:convert';
+//import 'dart:html';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:currency_converter/constants/globals.dart';
 import 'package:currency_converter/widgets/my_currencies_bottom_sheet.dart';
@@ -37,8 +39,10 @@ class _Page3State extends State<Page3> {
     Uri currencyUri = Uri.parse(currencyListUrl);
     Uri ratesUri = Uri.parse(exchageRatesUSDUrl);
 
-    final responses = await Future.wait([http.get(currencyUri), http.get(ratesUri)]);
-    if (responses[0].statusCode == HttpStatus.ok && responses[1].statusCode == HttpStatus.ok) {
+    final responses =
+        await Future.wait([http.get(currencyUri), http.get(ratesUri)]);
+    if (responses[0].statusCode == HttpStatus.ok &&
+        responses[1].statusCode == HttpStatus.ok) {
       String currenciesJson = responses[0].body;
       String ratesJson = responses[1].body;
 
@@ -64,9 +68,11 @@ class _Page3State extends State<Page3> {
             final fromRate = rates['usd'][selectedCurrency];
             final toRate = rates['usd'][selectedCurrencyTo];
             if (selectedField == 0) {
-              pkrValue = ((toRate / fromRate) * double.parse(usdValue)).toString();
+              pkrValue =
+                  ((toRate / fromRate) * double.parse(usdValue)).toString();
             } else if (selectedField == 1) {
-              usdValue = ((fromRate / toRate) * double.parse(pkrValue)).toString();
+              usdValue =
+                  ((fromRate / toRate) * double.parse(pkrValue)).toString();
             }
             // final keys = currencies.keys.toList();
             //final rate = rates.values.toList();
@@ -77,9 +83,6 @@ class _Page3State extends State<Page3> {
               decoration: ShapeDecoration(shape: Border.all()),
               child: ListView(
                 children: [
-                  const SizedBox(
-                    height: 10.0,
-                  ),
                   /* const Text(
                     "From",
                     style: TextStyle(
@@ -145,14 +148,15 @@ class _Page3State extends State<Page3> {
                     },
                   ),*/
                   const SizedBox(
-                    height: 30.0,
+                    height: 10.0,
                   ),
                   MyCurrecyRow(
                     currencyCode: selectedCurrency,
                     currencyName: currencies[selectedCurrency] ?? "",
                     isSelected: selectedField == 0,
                     value: usdValue,
-                    onSelectCurrency: () => showCurreciesBottomSheet(context, 0),
+                    onSelectCurrency: () =>
+                        showCurreciesBottomSheet(context, 0),
                     onSelectText: () {
                       if (selectedField != 0) {
                         usdValue = '1';
@@ -274,7 +278,8 @@ class _Page3State extends State<Page3> {
                     currencyName: currencies[selectedCurrencyTo] ?? "",
                     isSelected: selectedField == 1,
                     value: pkrValue,
-                    onSelectCurrency: () => showCurreciesBottomSheet(context, 1),
+                    onSelectCurrency: () =>
+                        showCurreciesBottomSheet(context, 1),
                     onSelectText: () {
                       if (selectedField != 1) {
                         pkrValue = '1';
@@ -354,13 +359,59 @@ class _Page3State extends State<Page3> {
                         setState(() {});
                       },
                       textColor: Colors.red,
-                      rightButtonFn: () {},
+                      rightButtonFn: () {
+                        if (selectedField == 0) {
+                          //String temp1 = usdValue;
+                          if (usdValue.length == 1) {
+                            usdValue = '1';
+                          } else {
+                            List<String> temp = List<String>.generate(
+                                usdValue.length, (index) => (usdValue[index]));
+                            for (int i = 0; i < (temp.length) - 1; i++) {
+                              if (i == 0) {
+                                usdValue = temp[i].toString();
+                              } else {
+                                usdValue += temp[i].toString();
+                              }
+                            }
+                          }
+                        } else {
+                          if (pkrValue.length == 1) {
+                            pkrValue = '1';
+                          } else {
+                            List<String> temp = List<String>.generate(
+                                pkrValue.length, (index) => (pkrValue[index]));
+                            for (int i = 0; i < (temp.length) - 1; i++) {
+                              if (i == 0) {
+                                pkrValue = temp[i].toString();
+                              } else {
+                                pkrValue += temp[i].toString();
+                              }
+                            }
+                          }
+                        }
+                        setState(() {});
+                      },
                       rightIcon: const Icon(
                         Icons.backspace,
                         color: Colors.red,
                       ),
                       leftButtonFn: () {
-                        
+                        if (selectedField == 0) {
+                          if (usdValue.contains('.')) {
+                            usdValue = usdValue;
+                          } else {
+                            usdValue += '.';
+                          }
+                          setState(() {});
+                        } else {
+                          if (pkrValue.contains('.')) {
+                            pkrValue = pkrValue;
+                          } else {
+                            pkrValue += '.';
+                          }
+                          setState(() {});
+                        }
                       },
                       leftIcon: const Icon(
                         Icons.circle,
@@ -388,11 +439,13 @@ class _Page3State extends State<Page3> {
     );
   }
 
-  PersistentBottomSheetController<T> showCurreciesBottomSheet<T>(BuildContext context, int sheetForText) {
+  PersistentBottomSheetController<T> showCurreciesBottomSheet<T>(
+      BuildContext context, int sheetForText) {
     return showBottomSheet<T>(
         elevation: 50.0,
         backgroundColor: const Color.fromARGB(252, 14, 14, 14),
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
         context: context,
         builder: (context) {
           return Scaffold(
