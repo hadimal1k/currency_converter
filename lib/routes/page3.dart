@@ -1,7 +1,5 @@
 import 'dart:convert';
-//import 'dart:html';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:currency_converter/constants/globals.dart';
 import 'package:currency_converter/widgets/my_currencies_bottom_sheet.dart';
@@ -26,6 +24,7 @@ class _Page3State extends State<Page3> {
   String usdValue = '1';
   String pkrValue = '1';
   int selectedField = 0;
+  int inputCounter = 0;
 
   late Future<void> initialize;
 
@@ -161,6 +160,7 @@ class _Page3State extends State<Page3> {
                       if (selectedField != 0) {
                         usdValue = '1';
                         selectedField = 0;
+                        inputCounter = 0;
                         setState(() {});
                       }
                     },
@@ -284,6 +284,7 @@ class _Page3State extends State<Page3> {
                       if (selectedField != 1) {
                         pkrValue = '1';
                         selectedField = 1;
+                        inputCounter = 0;
                         setState(() {});
                       }
                     },
@@ -344,15 +345,19 @@ class _Page3State extends State<Page3> {
                   NumericKeyboard(
                       onKeyboardTap: (text) {
                         if (selectedField == 0) {
-                          if (usdValue == '1') {
+                          if (usdValue == '1' && inputCounter == 0) {
+                            inputCounter = 1;
                             usdValue = text;
                           } else {
+                            inputCounter = 0;
                             usdValue += text;
                           }
                         } else if (selectedField == 1) {
-                          if (pkrValue == '1') {
+                          if (pkrValue == '1' && inputCounter == 0) {
+                            inputCounter = 1;
                             pkrValue = text;
                           } else {
+                            inputCounter = 0;
                             pkrValue += text;
                           }
                         }

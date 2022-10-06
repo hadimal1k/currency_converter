@@ -1,6 +1,6 @@
-import 'dart:ui';
+//import 'dart:ui';
 
-import 'package:currency_converter/routes/page2.dart';
+//import 'package:currency_converter/routes/page2.dart';
 import 'package:currency_converter/routes/page3.dart';
 import 'package:flutter/material.dart';
 
@@ -41,7 +41,7 @@ class WelcomeRoute extends StatelessWidget {
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.all(25.0),
+                  padding: const EdgeInsets.all(25.0),
                   foregroundColor: Colors.white70,
                   backgroundColor: const Color.fromARGB(255, 42, 97, 44)),
               onPressed: () {
