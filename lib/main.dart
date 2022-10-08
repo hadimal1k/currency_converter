@@ -1,7 +1,10 @@
+import 'package:currency_converter/constants/globals.dart';
 import 'package:currency_converter/routes/welcome.dart';
 import 'package:flutter/material.dart';
 
-void main() {
+void main() /*async*/ {
+  // WidgetsFlutterBinding.ensureInitialized();
+  // prefs = await SharedPreference.getInstance();
   runApp(const CurrecnyConverter());
 }
 

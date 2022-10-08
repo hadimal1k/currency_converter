@@ -5,6 +5,7 @@ import 'package:currency_converter/constants/globals.dart';
 import 'package:currency_converter/widgets/my_currencies_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:numeric_keyboard/numeric_keyboard.dart';
 
 class Page3 extends StatefulWidget {
@@ -35,19 +36,26 @@ class _Page3State extends State<Page3> {
   }
 
   Future<void> _loadData() async {
+    // currencies = prefs.getString('currencies') ?? {};
+    // rates = prefs.getString('rates') ?? {};
+
+    // if(currencies.isNotEmpty && rates.isNotEmpty) {
+
+    // }
     Uri currencyUri = Uri.parse(currencyListUrl);
     Uri ratesUri = Uri.parse(exchageRatesUSDUrl);
 
-    final responses =
-        await Future.wait([http.get(currencyUri), http.get(ratesUri)]);
-    if (responses[0].statusCode == HttpStatus.ok &&
-        responses[1].statusCode == HttpStatus.ok) {
-      String currenciesJson = responses[0].body;
-      String ratesJson = responses[1].body;
+    Future.wait([http.get(currencyUri), http.get(ratesUri)]).then((responses) {
+      if (responses[0].statusCode == HttpStatus.ok && responses[1].statusCode == HttpStatus.ok) {
+        String currenciesJson = responses[0].body;
+        String ratesJson = responses[1].body;
 
-      currencies = Map.from(jsonDecode(currenciesJson));
-      rates = Map.from(jsonDecode(ratesJson));
-    }
+        currencies = Map.from(jsonDecode(currenciesJson));
+        rates = Map.from(jsonDecode(ratesJson));
+        //add to shared prefs
+      }
+      setState(() {});
+    });
   }
 
   @override
@@ -67,20 +75,18 @@ class _Page3State extends State<Page3> {
             final fromRate = rates['usd'][selectedCurrency];
             final toRate = rates['usd'][selectedCurrencyTo];
             if (selectedField == 0) {
-              pkrValue =
-                  ((toRate / fromRate) * double.parse(usdValue)).toString();
+              pkrValue = ((toRate / fromRate) * double.parse(usdValue)).toString();
             } else if (selectedField == 1) {
-              usdValue =
-                  ((fromRate / toRate) * double.parse(pkrValue)).toString();
+              usdValue = ((fromRate / toRate) * double.parse(pkrValue)).toString();
             }
             // final keys = currencies.keys.toList();
             //final rate = rates.values.toList();
             // final keysTo = currencies.keys.toList();
             return Container(
               padding: const EdgeInsets.all(20.0),
-              margin: const EdgeInsets.all(10),
               decoration: ShapeDecoration(shape: Border.all()),
-              child: ListView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   /* const Text(
                     "From",
@@ -146,16 +152,13 @@ class _Page3State extends State<Page3> {
                       });
                     },
                   ),*/
-                  const SizedBox(
-                    height: 10.0,
-                  ),
+                  const SizedBox(height: 10.0),
                   MyCurrecyRow(
                     currencyCode: selectedCurrency,
                     currencyName: currencies[selectedCurrency] ?? "",
                     isSelected: selectedField == 0,
                     value: usdValue,
-                    onSelectCurrency: () =>
-                        showCurreciesBottomSheet(context, 0),
+                    onSelectCurrency: () => showCurreciesBottomSheet(context, 0),
                     onSelectText: () {
                       if (selectedField != 0) {
                         usdValue = '1';
@@ -278,8 +281,7 @@ class _Page3State extends State<Page3> {
                     currencyName: currencies[selectedCurrencyTo] ?? "",
                     isSelected: selectedField == 1,
                     value: pkrValue,
-                    onSelectCurrency: () =>
-                        showCurreciesBottomSheet(context, 1),
+                    onSelectCurrency: () => showCurreciesBottomSheet(context, 1),
                     onSelectText: () {
                       if (selectedField != 1) {
                         pkrValue = '1';
@@ -341,89 +343,92 @@ class _Page3State extends State<Page3> {
                   //   ],
                   // ),
 
-                  const SizedBox(height: 10),
+                  const Spacer(),
                   NumericKeyboard(
-                      onKeyboardTap: (text) {
-                        if (selectedField == 0) {
-                          if (usdValue == '1' && inputCounter == 0) {
-                            inputCounter = 1;
-                            usdValue = text;
-                          } else {
-                            inputCounter = 0;
+                    onKeyboardTap: (text) {
+                      if (selectedField == 0) {
+                        if (usdValue == '1' && inputCounter == 0) {
+                          inputCounter = 1;
+                          usdValue = text;
+                        } else {
+                          inputCounter = 0;
+                          if (text.length < 11) {
                             usdValue += text;
                           }
-                        } else if (selectedField == 1) {
-                          if (pkrValue == '1' && inputCounter == 0) {
-                            inputCounter = 1;
-                            pkrValue = text;
-                          } else {
-                            inputCounter = 0;
+                        }
+                      } else if (selectedField == 1) {
+                        if (pkrValue == '1' && inputCounter == 0) {
+                          inputCounter = 1;
+                          pkrValue = text;
+                        } else {
+                          inputCounter = 0;
+                          if (text.length < 11) {
                             pkrValue += text;
                           }
                         }
-                        setState(() {});
-                      },
-                      textColor: Colors.red,
-                      rightButtonFn: () {
-                        if (selectedField == 0) {
-                          //String temp1 = usdValue;
-                          if (usdValue.length == 1) {
-                            usdValue = '1';
-                          } else {
-                            List<String> temp = List<String>.generate(
-                                usdValue.length, (index) => (usdValue[index]));
-                            for (int i = 0; i < (temp.length) - 1; i++) {
-                              if (i == 0) {
-                                usdValue = temp[i].toString();
-                              } else {
-                                usdValue += temp[i].toString();
-                              }
-                            }
-                          }
+                      }
+                      setState(() {});
+                    },
+                    textColor: Colors.red,
+                    rightButtonFn: () {
+                      if (selectedField == 0) {
+                        //String temp1 = usdValue;
+                        if (usdValue.length == 1) {
+                          usdValue = '1';
                         } else {
-                          if (pkrValue.length == 1) {
-                            pkrValue = '1';
-                          } else {
-                            List<String> temp = List<String>.generate(
-                                pkrValue.length, (index) => (pkrValue[index]));
-                            for (int i = 0; i < (temp.length) - 1; i++) {
-                              if (i == 0) {
-                                pkrValue = temp[i].toString();
-                              } else {
-                                pkrValue += temp[i].toString();
-                              }
+                          List<String> temp = List<String>.generate(usdValue.length, (index) => (usdValue[index]));
+                          for (int i = 0; i < (temp.length) - 1; i++) {
+                            if (i == 0) {
+                              usdValue = temp[i].toString();
+                            } else {
+                              usdValue += temp[i].toString();
                             }
                           }
                         }
-                        setState(() {});
-                      },
-                      rightIcon: const Icon(
-                        Icons.backspace,
-                        color: Colors.red,
-                      ),
-                      leftButtonFn: () {
-                        if (selectedField == 0) {
-                          if (usdValue.contains('.')) {
-                            usdValue = usdValue;
-                          } else {
-                            usdValue += '.';
-                          }
-                          setState(() {});
+                      } else {
+                        if (pkrValue.length == 1) {
+                          pkrValue = '1';
                         } else {
-                          if (pkrValue.contains('.')) {
-                            pkrValue = pkrValue;
-                          } else {
-                            pkrValue += '.';
+                          List<String> temp = List<String>.generate(pkrValue.length, (index) => (pkrValue[index]));
+                          for (int i = 0; i < (temp.length) - 1; i++) {
+                            if (i == 0) {
+                              pkrValue = temp[i].toString();
+                            } else {
+                              pkrValue += temp[i].toString();
+                            }
                           }
-                          setState(() {});
                         }
-                      },
-                      leftIcon: const Icon(
-                        Icons.circle,
-                        color: Colors.red,
-                        size: 8,
-                      ),
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly)
+                      }
+                      setState(() {});
+                    },
+                    rightIcon: const Icon(
+                      Icons.backspace,
+                      color: Colors.red,
+                    ),
+                    leftButtonFn: () {
+                      if (selectedField == 0) {
+                        if (usdValue.contains('.')) {
+                          usdValue = usdValue;
+                        } else {
+                          usdValue += '.';
+                        }
+                        setState(() {});
+                      } else {
+                        if (pkrValue.contains('.')) {
+                          pkrValue = pkrValue;
+                        } else {
+                          pkrValue += '.';
+                        }
+                        setState(() {});
+                      }
+                    },
+                    leftIcon: const Icon(
+                      Icons.circle,
+                      color: Colors.red,
+                      size: 8,
+                    ),
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  )
                   /* ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         fixedSize: const Size(5.0, 50.0),
@@ -444,33 +449,31 @@ class _Page3State extends State<Page3> {
     );
   }
 
-  PersistentBottomSheetController<T> showCurreciesBottomSheet<T>(
-      BuildContext context, int sheetForText) {
-    return showBottomSheet<T>(
+  Future<T?> showCurreciesBottomSheet<T>(BuildContext context, int sheetForText) {
+    return showModalBottomSheet<T>(
         elevation: 50.0,
-        backgroundColor: const Color.fromARGB(252, 14, 14, 14),
-        shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+        isDismissible: true,
+        backgroundColor: Colors.transparent,
+        constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
         context: context,
         builder: (context) {
-          return Scaffold(
-            body: MyCurrenciesBottomSheet(
-              currencies: currencies,
-              onSelectCurrency: (String code) {
-                setState(() {
-                  if (sheetForText == 0) {
-                    selectedCurrency = code;
-                  } else if (sheetForText == 1) {
-                    selectedCurrencyTo = code;
-                  }
-                });
-                Navigator.pop(context);
-              },
-            ),
+          return MyCurrenciesBottomSheet(
+            currencies: currencies,
+            onSelectCurrency: (String code) {
+              setState(() {
+                if (sheetForText == 0) {
+                  selectedCurrency = code;
+                } else if (sheetForText == 1) {
+                  selectedCurrencyTo = code;
+                }
+              });
+              Navigator.pop(context);
+            },
           );
         });
   }
-} 
+}
 
 class MyCurrecyRow extends StatelessWidget {
   final String currencyCode;
@@ -516,8 +519,10 @@ class MyCurrecyRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  value.toString(),
+                  value.substring(0, value.length > 11 ? 11 : value.length),
                   textAlign: TextAlign.right,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 32,
                     color: isSelected ? Colors.blue : Colors.white,
