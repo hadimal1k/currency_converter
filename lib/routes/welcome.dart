@@ -1,6 +1,7 @@
 //import 'dart:ui';
 
 //import 'package:currency_converter/routes/page2.dart';
+import 'package:currency_converter/routes/page2.dart';
 import 'package:currency_converter/routes/page3.dart';
 import 'package:flutter/material.dart';
 
@@ -58,7 +59,28 @@ class WelcomeRoute extends StatelessWidget {
                 "Currency Converter",
                 style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
               ),
-            )
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.all(25.0),
+                  foregroundColor: Colors.white70,
+                  backgroundColor: const Color.fromARGB(255, 42, 97, 44)),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) {
+                    return const Page2();
+                  }),
+                );
+              },
+              child: Text(
+                "Unit Converter",
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              ),
+            ),
 
             //[DropdownButton(items: items, onChanged: onChanged)],
           ],
