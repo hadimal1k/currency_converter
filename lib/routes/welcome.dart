@@ -2,7 +2,7 @@
 
 //import 'package:currency_converter/routes/page2.dart';
 import 'package:currency_converter/routes/page2.dart';
-import 'package:currency_converter/routes/page3.dart';
+import 'package:currency_converter/routes/Currency_Converter.dart';
 import 'package:flutter/material.dart';
 
 class WelcomeRoute extends StatelessWidget {
@@ -50,7 +50,7 @@ class WelcomeRoute extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) {
-                      return const Page3();
+                      return const CurrencyConverter();
                     },
                   ),
                 );
@@ -76,7 +76,7 @@ class WelcomeRoute extends StatelessWidget {
                   }),
                 );
               },
-              child: Text(
+              child: const Text(
                 "Unit Converter",
                 style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
               ),

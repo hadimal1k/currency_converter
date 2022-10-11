@@ -1,10 +1,13 @@
 import 'package:currency_converter/constants/globals.dart';
 import 'package:currency_converter/routes/welcome.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() /*async*/ {
-  // WidgetsFlutterBinding.ensureInitialized();
-  // prefs = await SharedPreference.getInstance();
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  //prefs.setString('currencies', currencies);
+
   runApp(const CurrecnyConverter());
 }
 

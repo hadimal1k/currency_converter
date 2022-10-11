@@ -23,31 +23,46 @@ class _Page2State extends State<Page2> {
         backgroundColor: Colors.black45,
         title: const Text("Unit Converter"),
       ),
-      body: Container(
-        padding: const EdgeInsets.all(20.0),
-        margin: const EdgeInsets.all(10.0),
-        decoration: ShapeDecoration(
-            shape: Border.all(color: Colors.white, style: BorderStyle.solid),
-            color: Colors.black),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            /*const SizedBox(
-              width: 20,
-              height: 100,
-            ),*/
-            GestureDetector(
-              onTap: () => {},
-              child: const Text(
-                "cm",
-                style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white),
-              ),
-            )
-          ],
-        ),
+      body: ListView(
+        children: [
+          const SizedBox(
+            height: 20,
+          ),
+          Container(
+            padding: const EdgeInsets.all(20.0),
+            margin: const EdgeInsets.all(10.0),
+            decoration: ShapeDecoration(
+                shape:
+                    Border.all(color: Colors.white, style: BorderStyle.solid),
+                color: Colors.black),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                /*const SizedBox(
+                width: 20,
+                height: 100,
+              ),*/
+                InkWell(
+                  onTap: () => {
+                    showBottomSheet(
+                        backgroundColor: Colors.amber,
+                        context: context,
+                        builder: (context) {
+                          return const Scaffold();
+                        })
+                  },
+                  child: const Text(
+                    "cm",
+                    style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white),
+                  ),
+                )
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
