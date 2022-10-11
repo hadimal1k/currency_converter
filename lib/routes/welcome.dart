@@ -2,7 +2,7 @@
 
 //import 'package:currency_converter/routes/page2.dart';
 import 'package:currency_converter/routes/page2.dart';
-import 'package:currency_converter/routes/Currency_Converter.dart';
+import 'package:currency_converter/routes/currency_converter.dart';
 import 'package:flutter/material.dart';
 
 class WelcomeRoute extends StatelessWidget {

@@ -15,8 +15,8 @@ class CurrencyConverter extends StatefulWidget {
 }
 
 class _CurrencyConverterState extends State<CurrencyConverter> {
-  Map<String, String> currencies = {};
-  Map<String, dynamic> rates = {};
+  Map<String, String>? currencies;
+  Map<String, dynamic>? rates;
   String selectedCurrency = 'usd';
   String selectedCurrencyTo = 'pkr';
   String usdValue = '1';
@@ -33,27 +33,34 @@ class _CurrencyConverterState extends State<CurrencyConverter> {
   }
 
   Future<void> _loadData() async {
+    // if(rates == null || currencies == null){
     // currencies = prefs.getString('currencies') ?? {};
-    // rates = prefs.getString('rates') ?? {};
+    // String? ratesstr = prefs.getString('rates');
+    // rates = ratesstr == null ? null : jsonDecode(ratesstr);
 
     // if(currencies.isNotEmpty && rates.isNotEmpty) {
 
+    // }
     // }
     Uri currencyUri = Uri.parse(currencyListUrl);
     Uri ratesUri = Uri.parse(exchageRatesUSDUrl);
 
     Future.wait([http.get(currencyUri), http.get(ratesUri)]).then((responses) {
-      if (responses[0].statusCode == HttpStatus.ok &&
-          responses[1].statusCode == HttpStatus.ok) {
+      if (responses[0].statusCode == HttpStatus.ok && responses[1].statusCode == HttpStatus.ok) {
         String currenciesJson = responses[0].body;
         String ratesJson = responses[1].body;
 
         currencies = Map.from(jsonDecode(currenciesJson));
         rates = Map.from(jsonDecode(ratesJson));
         //add to shared prefs
+        prefs.setString('currencies', currenciesJson);
       }
       setState(() {});
     });
+  }
+
+  void reload() {
+    //reload data
   }
 
   @override
@@ -69,15 +76,24 @@ class _CurrencyConverterState extends State<CurrencyConverter> {
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
+            } else if (rates == null || currencies == null) {
+              return Column(
+                children: [
+                  Text("something went wrong, please check you connection"),
+                  SizedBox(height: 6),
+                  ElevatedButton(
+                    onPressed: reload,
+                    child: Text("relead"),
+                  ),
+                ],
+              );
             }
-            final fromRate = rates['usd'][selectedCurrency];
-            final toRate = rates['usd'][selectedCurrencyTo];
+            final fromRate = rates!['usd'][selectedCurrency];
+            final toRate = rates!['usd'][selectedCurrencyTo];
             if (selectedField == 0) {
-              pkrValue =
-                  ((toRate / fromRate) * double.parse(usdValue)).toString();
+              pkrValue = ((toRate / fromRate) * double.parse(usdValue)).toString();
             } else if (selectedField == 1) {
-              usdValue =
-                  ((fromRate / toRate) * double.parse(pkrValue)).toString();
+              usdValue = ((fromRate / toRate) * double.parse(pkrValue)).toString();
             }
             // final keys = currencies.keys.toList();
             //final rate = rates.values.toList();
@@ -155,11 +171,10 @@ class _CurrencyConverterState extends State<CurrencyConverter> {
                   const SizedBox(height: 10.0),
                   MyCurrecyRow(
                     currencyCode: selectedCurrency,
-                    currencyName: currencies[selectedCurrency] ?? "",
+                    currencyName: currencies![selectedCurrency] ?? "",
                     isSelected: selectedField == 0,
                     value: usdValue,
-                    onSelectCurrency: () =>
-                        showCurreciesBottomSheet(context, 0),
+                    onSelectCurrency: () => showCurreciesBottomSheet(context, 0),
                     onSelectText: () {
                       if (selectedField != 0) {
                         usdValue = '1';
@@ -279,11 +294,10 @@ class _CurrencyConverterState extends State<CurrencyConverter> {
                   const SizedBox(height: 10.0),
                   MyCurrecyRow(
                     currencyCode: selectedCurrencyTo,
-                    currencyName: currencies[selectedCurrencyTo] ?? "",
+                    currencyName: currencies![selectedCurrencyTo] ?? "",
                     isSelected: selectedField == 1,
                     value: pkrValue,
-                    onSelectCurrency: () =>
-                        showCurreciesBottomSheet(context, 1),
+                    onSelectCurrency: () => showCurreciesBottomSheet(context, 1),
                     onSelectText: () {
                       if (selectedField != 1) {
                         pkrValue = '1';
@@ -377,8 +391,7 @@ class _CurrencyConverterState extends State<CurrencyConverter> {
                         if (usdValue.length == 1) {
                           usdValue = '1';
                         } else {
-                          List<String> temp = List<String>.generate(
-                              usdValue.length, (index) => (usdValue[index]));
+                          List<String> temp = List<String>.generate(usdValue.length, (index) => (usdValue[index]));
                           for (int i = 0; i < (temp.length) - 1; i++) {
                             if (i == 0) {
                               usdValue = temp[i].toString();
@@ -391,8 +404,7 @@ class _CurrencyConverterState extends State<CurrencyConverter> {
                         if (pkrValue.length == 1) {
                           pkrValue = '1';
                         } else {
-                          List<String> temp = List<String>.generate(
-                              pkrValue.length, (index) => (pkrValue[index]));
+                          List<String> temp = List<String>.generate(pkrValue.length, (index) => (pkrValue[index]));
                           for (int i = 0; i < (temp.length) - 1; i++) {
                             if (i == 0) {
                               pkrValue = temp[i].toString();
@@ -452,20 +464,17 @@ class _CurrencyConverterState extends State<CurrencyConverter> {
     );
   }
 
-  Future<T?> showCurreciesBottomSheet<T>(
-      BuildContext context, int sheetForText) {
+  Future<T?> showCurreciesBottomSheet<T>(BuildContext context, int sheetForText) {
     return showModalBottomSheet<T>(
         elevation: 50.0,
         isDismissible: true,
         backgroundColor: Colors.transparent,
-        constraints:
-            BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),
-        shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+        constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
         context: context,
         builder: (context) {
           return MyCurrenciesBottomSheet(
-            currencies: currencies,
+            currencies: currencies!,
             onSelectCurrency: (String code) {
               setState(() {
                 if (sheetForText == 0) {
