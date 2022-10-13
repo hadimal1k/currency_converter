@@ -1,10 +1,13 @@
 import 'dart:convert';
+import 'dart:ui';
+import 'dart:ffi';
 import 'dart:io';
 
 import 'package:currency_converter/constants/globals.dart';
 import 'package:currency_converter/widgets/my_currencies_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:numeric_keyboard/numeric_keyboard.dart';
 
 class CurrencyConverter extends StatefulWidget {
@@ -23,6 +26,7 @@ class _CurrencyConverterState extends State<CurrencyConverter> {
   String pkrValue = '1';
   int selectedField = 0;
   int inputCounter = 0;
+  DateTime? date;
 
   late Future<void> initialize;
 
@@ -33,34 +37,55 @@ class _CurrencyConverterState extends State<CurrencyConverter> {
   }
 
   Future<void> _loadData() async {
-    // if(rates == null || currencies == null){
-    // currencies = prefs.getString('currencies') ?? {};
-    // String? ratesstr = prefs.getString('rates');
-    // rates = ratesstr == null ? null : jsonDecode(ratesstr);
+    //if (rates == null || currencies == null) {
+    dynamic currenciesstr = prefs.getString('currstr');
+    currencies = Map.from(jsonDecode(currenciesstr));
+    dynamic ratesstr = prefs.getString('ratstr');
+    rates = Map.from(jsonDecode(ratesstr));
+    int? dateTime = prefs.getInt('myTimeStamp');
+    date = DateTime.fromMillisecondsSinceEpoch(dateTime!);
+    //console.log('date');
+    //int? dateTime = (prefs.getInt('date'));
+    //date1 = DateTime.fromMillisecondsSinceEpoch(dateTime!);
+
+    // }
+    //ratesstr == null ? null : jsonDecode(ratesstr);
 
     // if(currencies.isNotEmpty && rates.isNotEmpty) {
 
     // }
-    // }
-    Uri currencyUri = Uri.parse(currencyListUrl);
-    Uri ratesUri = Uri.parse(exchageRatesUSDUrl);
+    //}
+    if (currencies == null && rates == null) {
+      Uri currencyUri = Uri.parse(currencyListUrl);
+      Uri ratesUri = Uri.parse(exchageRatesUSDUrl);
 
-    Future.wait([http.get(currencyUri), http.get(ratesUri)]).then((responses) {
-      if (responses[0].statusCode == HttpStatus.ok && responses[1].statusCode == HttpStatus.ok) {
-        String currenciesJson = responses[0].body;
-        String ratesJson = responses[1].body;
+      Future.wait([http.get(currencyUri), http.get(ratesUri)])
+          .then((responses) {
+        if (responses[0].statusCode == HttpStatus.ok &&
+            responses[1].statusCode == HttpStatus.ok) {
+          String currenciesJson = responses[0].body;
+          String ratesJson = responses[1].body;
 
-        currencies = Map.from(jsonDecode(currenciesJson));
-        rates = Map.from(jsonDecode(ratesJson));
-        //add to shared prefs
-        prefs.setString('currencies', currenciesJson);
-      }
-      setState(() {});
-    });
+          currencies = Map.from(jsonDecode(currenciesJson));
+          rates = Map.from(jsonDecode(ratesJson));
+          //add to shared prefs
+          prefs.setString('currstr', currenciesJson);
+          prefs.setString('ratstr', ratesJson);
+          int timestamp = DateTime.now().millisecondsSinceEpoch;
+          prefs.setInt('myTimeStamp', timestamp);
+
+          //var date = DateTime.now().millisecondsSinceEpoch;
+          //prefs.setInt('date', date);
+        }
+        setState(() {});
+      });
+    }
   }
 
   void reload() {
-    //reload data
+    currencies = null;
+    rates = null;
+    _loadData();
   }
 
   @override
@@ -79,11 +104,14 @@ class _CurrencyConverterState extends State<CurrencyConverter> {
             } else if (rates == null || currencies == null) {
               return Column(
                 children: [
-                  Text("something went wrong, please check you connection"),
-                  SizedBox(height: 6),
+                  const Text(
+                    "Something went wrong, please check you connection",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  const SizedBox(height: 6),
                   ElevatedButton(
                     onPressed: reload,
-                    child: Text("relead"),
+                    child: const Text("Reload"),
                   ),
                 ],
               );
@@ -91,9 +119,11 @@ class _CurrencyConverterState extends State<CurrencyConverter> {
             final fromRate = rates!['usd'][selectedCurrency];
             final toRate = rates!['usd'][selectedCurrencyTo];
             if (selectedField == 0) {
-              pkrValue = ((toRate / fromRate) * double.parse(usdValue)).toString();
+              pkrValue =
+                  ((toRate / fromRate) * double.parse(usdValue)).toString();
             } else if (selectedField == 1) {
-              usdValue = ((fromRate / toRate) * double.parse(pkrValue)).toString();
+              usdValue =
+                  ((fromRate / toRate) * double.parse(pkrValue)).toString();
             }
             // final keys = currencies.keys.toList();
             //final rate = rates.values.toList();
@@ -104,77 +134,14 @@ class _CurrencyConverterState extends State<CurrencyConverter> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  /* const Text(
-                    "From",
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold),
-                  ),*/
-                  /*
-                  ElevatedButton(
-                    style:
-                        ElevatedButton.styleFrom(padding: EdgeInsets.all(25.0)),
-                    onPressed: () {
-                      showBottomSheet(
-                          elevation: 50.0,
-                          backgroundColor: Colors.green,
-                          shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.vertical(
-                                  top: Radius.circular(20))),
-                          context: context,
-                          builder: (context) {
-                            return MyCurrenciesBottomSheet(
-                              currencies: currencies,
-                              onSelectCurrency: (String code) {
-                                setState(() {
-                                  selectedCurrency = code;
-                                });
-                                Navigator.pop(context);
-                              },
-                            );
-                          });
-                    },
-                    child: const Text(
-                      "Select Currency",
-                      style: TextStyle(fontSize: 20),
-                    ),
-                  ),*/
-
-                  /* DropdownButton<String>(
-                    iconSize: 50.0,
-                    iconEnabledColor: Colors.blue,
-                    //icon: Icons(Icons.currency_bitcoin),
-                    style: const TextStyle(color: Colors.blueAccent),
-                    //backgroundColor: Colors.purpleAccent),
-                    value: selectedCurrency,
-                    selectedItemBuilder: (context) {
-                      return [
-                        for (int i = 0; i < keys.length; i++)
-                          Center(child: Text(keys[i].toString().toUpperCase()))
-                      ];
-                    },
-                    //hint: const Text("Select Currency"),
-                    items: [
-                      for (int i = 0; i < keys.length; i++)
-                        DropdownMenuItem<String>(
-                          value: keys[i],
-                          child: Text(currencies[keys[i]] ?? ""),
-                        )
-                    ],
-                    onChanged: (value) {
-                      setState(() {
-                        selectedCurrency = value ?? 'pkr';
-                      });
-                    },
-                  ),*/
                   const SizedBox(height: 10.0),
                   MyCurrecyRow(
                     currencyCode: selectedCurrency,
                     currencyName: currencies![selectedCurrency] ?? "",
                     isSelected: selectedField == 0,
                     value: usdValue,
-                    onSelectCurrency: () => showCurreciesBottomSheet(context, 0),
+                    onSelectCurrency: () =>
+                        showCurreciesBottomSheet(context, 0),
                     onSelectText: () {
                       if (selectedField != 0) {
                         usdValue = '1';
@@ -184,120 +151,14 @@ class _CurrencyConverterState extends State<CurrencyConverter> {
                       }
                     },
                   ),
-                  // TextField(
-                  //   style: const TextStyle(color: Colors.white38),
-                  //   controller: usdController,
-                  //   onChanged: (text) {
-                  //     if (text == "") {
-                  //       _pkrController.text = text;
-                  //     }
-                  //     double? usd = double.tryParse(text);
-                  //     if (usd != null) {
-                  //       _pkrController.text =
-                  //           "${((rates["usd"][selectedCurrencyTo] ?? 0) / (rates["usd"][selectedCurrency] ?? 0)) * usd}";
-                  //     }
-                  //   },
-                  //   inputFormatters: [
-                  //     FilteringTextInputFormatter.allow(
-                  //         RegExp('([0-9])+.{0,1}([0-9]*)')),
-                  //   ],
-                  //   decoration: InputDecoration(
-                  //     suffixIcon: Align(
-                  //       widthFactor: 1.0,
-                  //       heightFactor: 1.0,
-                  //       child: OutlinedButton(
-                  //         style: OutlinedButton.styleFrom(
-                  //           padding: EdgeInsets.all(22.0),
-                  //           fixedSize: Size(80.0, 50.0),
-                  //           side: const BorderSide(
-                  //               style: BorderStyle.solid,
-                  //               color: Colors.white,
-                  //               width: 1),
-                  //           foregroundColor: Colors.white,
-                  //           backgroundColor: Colors.black38,
-                  //         ),
-                  //         child: Text(selectedCurrency),
-                  //         onPressed: () {
-                  //           showBottomSheet(
-                  //               elevation: 50.0,
-                  //               backgroundColor:
-                  //                   const Color.fromARGB(247, 7, 7, 7),
-                  //               shape: const RoundedRectangleBorder(
-                  //                   borderRadius: BorderRadius.vertical(
-                  //                       top: Radius.circular(20))),
-                  //               context: context,
-                  //               builder: (context) {
-                  //                 return MyCurrenciesBottomSheet(
-                  //                   currencies: currencies,
-                  //                   onSelectCurrency: (String code) {
-                  //                     setState(() {
-                  //                       selectedCurrency = code;
-                  //                     });
-                  //                     Navigator.pop(context);
-                  //                   },
-                  //                 );
-                  //               });
-                  //         },
-                  //       ),
-                  //     ),
-                  //     labelText: '${currencies[selectedCurrency]}',
-                  //     prefixIcon:
-                  //         const Icon(Icons.money_sharp, color: Colors.blue),
-                  //     border: const OutlineInputBorder(),
-                  //     labelStyle: const TextStyle(color: Colors.white38),
-                  //   ),
-                  //   keyboardType: TextInputType.text,
-                  // ),
-
-                  const SizedBox(height: 10),
-                  /*const Text(
-                    "To Currency :",
-                    style: TextStyle(
-                        fontSize: 25.0,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blueAccent),
-                  ),
-                  const SizedBox(height: 10),
-                  DropdownButton(
-                    iconSize: 50.0,
-                    iconEnabledColor: Colors.greenAccent,
-                    style: const TextStyle(color: Colors.greenAccent),
-                    value: selectedCurrencyTo,
-                    selectedItemBuilder: (context) {
-                      return [
-                        for (int i = 0; i < keysTo.length; i++)
-                          Center(
-                            child: Text(keysTo[i].toString().toUpperCase()),
-                          )
-                      ];
-                    },
-                    items: [
-                      for (int i = 0; i < keysTo.length; i++)
-                        DropdownMenuItem<String>(
-                            value: keysTo[i],
-                            child: Text(currencies[keysTo[i]] ?? "")),
-                    ],
-                    onChanged: (value) {
-                      setState(() {
-                        selectedCurrencyTo = value ?? 'USD';
-                      });
-                    },
-                  ),*/
-                  /*const Text(
-                    "To :",
-                    style: TextStyle(
-                      fontSize: 25,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),*/
-                  const SizedBox(height: 10.0),
+                  const SizedBox(height: 20),
                   MyCurrecyRow(
                     currencyCode: selectedCurrencyTo,
                     currencyName: currencies![selectedCurrencyTo] ?? "",
                     isSelected: selectedField == 1,
                     value: pkrValue,
-                    onSelectCurrency: () => showCurreciesBottomSheet(context, 1),
+                    onSelectCurrency: () =>
+                        showCurreciesBottomSheet(context, 1),
                     onSelectText: () {
                       if (selectedField != 1) {
                         pkrValue = '1';
@@ -360,89 +221,139 @@ class _CurrencyConverterState extends State<CurrencyConverter> {
                   // ),
 
                   const Spacer(),
-                  NumericKeyboard(
-                    onKeyboardTap: (text) {
-                      if (selectedField == 0) {
-                        if (usdValue == '1' && inputCounter == 0) {
-                          inputCounter = 1;
-                          usdValue = text;
-                        } else {
-                          inputCounter = 0;
-                          if (text.length < 11) {
-                            usdValue += text;
-                          }
-                        }
-                      } else if (selectedField == 1) {
-                        if (pkrValue == '1' && inputCounter == 0) {
-                          inputCounter = 1;
-                          pkrValue = text;
-                        } else {
-                          inputCounter = 0;
-                          if (text.length < 11) {
-                            pkrValue += text;
-                          }
-                        }
-                      }
-                      setState(() {});
-                    },
-                    textColor: Colors.red,
-                    rightButtonFn: () {
-                      if (selectedField == 0) {
-                        if (usdValue.length == 1) {
-                          usdValue = '1';
-                        } else {
-                          List<String> temp = List<String>.generate(usdValue.length, (index) => (usdValue[index]));
-                          for (int i = 0; i < (temp.length) - 1; i++) {
-                            if (i == 0) {
-                              usdValue = temp[i].toString();
+                  Row(
+                    children: [
+                      Text(
+                        "Exchange rates according to date $date",
+                        style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.white38,
+                            decoration: TextDecoration.underline),
+                      ),
+                      const SizedBox(
+                        width: 5,
+                      ),
+                      InkWell(
+                        onTap: () {
+                          _loadData();
+                        },
+                        child: const Icon(
+                          Icons.refresh,
+                          color: Colors.white,
+                        ),
+                      )
+                    ],
+                  ),
+
+                  Row(
+                    children: [
+                      NumericKeyboard(
+                        onKeyboardTap: (text) {
+                          if (selectedField == 0) {
+                            if (usdValue == '1' && inputCounter == 0) {
+                              inputCounter = 1;
+                              usdValue = text;
                             } else {
-                              usdValue += temp[i].toString();
+                              inputCounter = 0;
+                              if (text.length < 11) {
+                                usdValue += text;
+                              }
+                            }
+                          } else if (selectedField == 1) {
+                            if (pkrValue == '1' && inputCounter == 0) {
+                              inputCounter = 1;
+                              pkrValue = text;
+                            } else {
+                              inputCounter = 0;
+                              if (text.length < 11) {
+                                pkrValue += text;
+                              }
                             }
                           }
-                        }
-                      } else {
-                        if (pkrValue.length == 1) {
-                          pkrValue = '1';
-                        } else {
-                          List<String> temp = List<String>.generate(pkrValue.length, (index) => (pkrValue[index]));
-                          for (int i = 0; i < (temp.length) - 1; i++) {
-                            if (i == 0) {
-                              pkrValue = temp[i].toString();
+                          setState(() {});
+                        },
+                        textColor: Colors.red,
+                        rightButtonFn: () {
+                          if (selectedField == 0) {
+                            if (usdValue.contains('.')) {
+                              usdValue = usdValue;
                             } else {
-                              pkrValue += temp[i].toString();
+                              usdValue += '.';
                             }
+                            setState(() {});
+                          } else {
+                            if (pkrValue.contains('.')) {
+                              pkrValue = pkrValue;
+                            } else {
+                              pkrValue += '.';
+                            }
+                            setState(() {});
                           }
-                        }
-                      }
-                      setState(() {});
-                    },
-                    rightIcon: const Icon(
-                      Icons.backspace,
-                      color: Colors.red,
-                    ),
-                    leftButtonFn: () {
-                      if (selectedField == 0) {
-                        if (usdValue.contains('.')) {
-                          usdValue = usdValue;
-                        } else {
-                          usdValue += '.';
-                        }
-                        setState(() {});
-                      } else {
-                        if (pkrValue.contains('.')) {
-                          pkrValue = pkrValue;
-                        } else {
-                          pkrValue += '.';
-                        }
-                        setState(() {});
-                      }
-                    },
-                    leftIcon: const Icon(
-                      Icons.circle,
-                      color: Colors.red,
-                      size: 8,
-                    ),
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        },
+                        rightIcon: const Icon(
+                          Icons.circle,
+                          color: Colors.red,
+                          size: 8,
+                        ),
+                        leftButtonFn: () {},
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      ),
+                      Column(children: [
+                        OutlinedButton(
+                            // style: ButtonStyle(fixedSize: Size(5, 20)),
+                            onPressed: () {
+                              if (selectedField == 0) {
+                                usdValue = '1';
+                              } else {
+                                pkrValue = '1';
+                              }
+                              setState(() {});
+                            },
+                            child: const Text(
+                              "AC",
+                              style: TextStyle(color: Colors.deepOrange),
+                            )),
+                        OutlinedButton(
+                            onPressed: () {
+                              if (selectedField == 0) {
+                                if (usdValue.length == 1) {
+                                  usdValue = '1';
+                                } else {
+                                  List<String> temp = List<String>.generate(
+                                      usdValue.length,
+                                      (index) => (usdValue[index]));
+                                  for (int i = 0; i < (temp.length) - 1; i++) {
+                                    if (i == 0) {
+                                      usdValue = temp[i].toString();
+                                    } else {
+                                      usdValue += temp[i].toString();
+                                    }
+                                  }
+                                }
+                              } else {
+                                if (pkrValue.length == 1) {
+                                  pkrValue = '1';
+                                } else {
+                                  List<String> temp = List<String>.generate(
+                                      pkrValue.length,
+                                      (index) => (pkrValue[index]));
+                                  for (int i = 0; i < (temp.length) - 1; i++) {
+                                    if (i == 0) {
+                                      pkrValue = temp[i].toString();
+                                    } else {
+                                      pkrValue += temp[i].toString();
+                                    }
+                                  }
+                                }
+                              }
+                              setState(() {});
+                            },
+                            child: const Icon(
+                              Icons.backspace,
+                              color: Colors.deepOrange,
+                            ))
+                      ])
+                    ],
                   )
                   /* ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -464,13 +375,16 @@ class _CurrencyConverterState extends State<CurrencyConverter> {
     );
   }
 
-  Future<T?> showCurreciesBottomSheet<T>(BuildContext context, int sheetForText) {
+  Future<T?> showCurreciesBottomSheet<T>(
+      BuildContext context, int sheetForText) {
     return showModalBottomSheet<T>(
         elevation: 50.0,
         isDismissible: true,
         backgroundColor: Colors.transparent,
-        constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+        constraints:
+            BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
         context: context,
         builder: (context) {
           return MyCurrenciesBottomSheet(

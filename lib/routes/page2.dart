@@ -1,10 +1,7 @@
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:currency_converter/constants/globals.dart';
+//import 'package:currency_converter/constants/globals.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
+//import 'package:flutter/services.dart';
+//import 'package:http/http.dart' as http;
 
 class Page2 extends StatefulWidget {
   const Page2({super.key});
