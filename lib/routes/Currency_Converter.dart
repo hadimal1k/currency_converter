@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:numeric_keyboard/numeric_keyboard.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CurrencyConverter extends StatefulWidget {
   const CurrencyConverter({super.key});
@@ -44,7 +45,9 @@ class _CurrencyConverterState extends State<CurrencyConverter> {
     int? dateTime = prefs.getInt('myTimeStamp');
     date = dateTime == null ? null : DateTime.fromMillisecondsSinceEpoch(dateTime);
     setState(() {});
-    Future.delayed(const Duration(seconds: 4));
+
+    SharedPreferences.getInstance().then((prefs) {});
+
 
     //console.log('date');
     //int? dateTime = (prefs.getInt('date'));
@@ -61,7 +64,21 @@ class _CurrencyConverterState extends State<CurrencyConverter> {
     Uri currencyUri = Uri.parse(currencyListUrl);
     Uri ratesUri = Uri.parse(exchageRatesUSDUrl);
 
+    // http.get(currencyUri).then((response1) {
+    //   http.get(ratesUri).then((response2) {
+        
+    //   });
+    // });
+
+    // final future1 = http.get(currencyUri);
+    // final future2 = http.get(ratesUri);
+
+    // final result1 = await future1;
+    // final result2 = await future2;
+    // final result2 = await future2;
+
     Future.wait([http.get(currencyUri), http.get(ratesUri)]).then((responses) async {
+      await Future.delayed(const Duration(seconds: 4));
       if (responses[0].statusCode == HttpStatus.ok && responses[1].statusCode == HttpStatus.ok) {
         String currenciesJson = responses[0].body;
         String ratesJson = responses[1].body;
