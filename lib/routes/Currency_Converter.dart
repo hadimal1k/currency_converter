@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:ui';
-import 'dart:ffi';
 import 'dart:io';
 
 import 'package:currency_converter/constants/globals.dart';
@@ -38,12 +37,15 @@ class _CurrencyConverterState extends State<CurrencyConverter> {
 
   Future<void> _loadData() async {
     //if (rates == null || currencies == null) {
-    dynamic currenciesstr = prefs.getString('currstr');
-    currencies = Map.from(jsonDecode(currenciesstr));
-    dynamic ratesstr = prefs.getString('ratstr');
-    rates = Map.from(jsonDecode(ratesstr));
+    String? currenciesstr = prefs.getString('currstr');
+    currencies = currenciesstr == null ? null : Map.from(jsonDecode(currenciesstr));
+    String? ratesstr = prefs.getString('ratstr');
+    rates = ratesstr == null ? null : Map.from(jsonDecode(ratesstr));
     int? dateTime = prefs.getInt('myTimeStamp');
-    date = DateTime.fromMillisecondsSinceEpoch(dateTime!);
+    date = dateTime == null ? null : DateTime.fromMillisecondsSinceEpoch(dateTime);
+    setState(() {});
+    Future.delayed(const Duration(seconds: 4));
+
     //console.log('date');
     //int? dateTime = (prefs.getInt('date'));
     //date1 = DateTime.fromMillisecondsSinceEpoch(dateTime!);
@@ -55,37 +57,28 @@ class _CurrencyConverterState extends State<CurrencyConverter> {
 
     // }
     //}
-    if (currencies == null && rates == null) {
-      Uri currencyUri = Uri.parse(currencyListUrl);
-      Uri ratesUri = Uri.parse(exchageRatesUSDUrl);
 
-      Future.wait([http.get(currencyUri), http.get(ratesUri)])
-          .then((responses) {
-        if (responses[0].statusCode == HttpStatus.ok &&
-            responses[1].statusCode == HttpStatus.ok) {
-          String currenciesJson = responses[0].body;
-          String ratesJson = responses[1].body;
+    Uri currencyUri = Uri.parse(currencyListUrl);
+    Uri ratesUri = Uri.parse(exchageRatesUSDUrl);
 
-          currencies = Map.from(jsonDecode(currenciesJson));
-          rates = Map.from(jsonDecode(ratesJson));
-          //add to shared prefs
-          prefs.setString('currstr', currenciesJson);
-          prefs.setString('ratstr', ratesJson);
-          int timestamp = DateTime.now().millisecondsSinceEpoch;
-          prefs.setInt('myTimeStamp', timestamp);
+    Future.wait([http.get(currencyUri), http.get(ratesUri)]).then((responses) async {
+      if (responses[0].statusCode == HttpStatus.ok && responses[1].statusCode == HttpStatus.ok) {
+        String currenciesJson = responses[0].body;
+        String ratesJson = responses[1].body;
 
-          //var date = DateTime.now().millisecondsSinceEpoch;
-          //prefs.setInt('date', date);
-        }
-        setState(() {});
-      });
-    }
-  }
+        currencies = Map.from(jsonDecode(currenciesJson));
+        rates = Map.from(jsonDecode(ratesJson));
+        //add to shared prefs
+        prefs.setString('currstr', currenciesJson);
+        prefs.setString('ratstr', ratesJson);
+        date = DateTime.now();
+        prefs.setInt('myTimeStamp', date!.millisecondsSinceEpoch);
 
-  void reload() {
-    currencies = null;
-    rates = null;
-    _loadData();
+        //var date = DateTime.now().millisecondsSinceEpoch;
+        //prefs.setInt('date', date);
+      }
+      setState(() {});
+    });
   }
 
   @override
@@ -110,7 +103,7 @@ class _CurrencyConverterState extends State<CurrencyConverter> {
                   ),
                   const SizedBox(height: 6),
                   ElevatedButton(
-                    onPressed: reload,
+                    onPressed: _loadData,
                     child: const Text("Reload"),
                   ),
                 ],
@@ -119,11 +112,9 @@ class _CurrencyConverterState extends State<CurrencyConverter> {
             final fromRate = rates!['usd'][selectedCurrency];
             final toRate = rates!['usd'][selectedCurrencyTo];
             if (selectedField == 0) {
-              pkrValue =
-                  ((toRate / fromRate) * double.parse(usdValue)).toString();
+              pkrValue = ((toRate / fromRate) * double.parse(usdValue)).toString();
             } else if (selectedField == 1) {
-              usdValue =
-                  ((fromRate / toRate) * double.parse(pkrValue)).toString();
+              usdValue = ((fromRate / toRate) * double.parse(pkrValue)).toString();
             }
             // final keys = currencies.keys.toList();
             //final rate = rates.values.toList();
@@ -140,8 +131,7 @@ class _CurrencyConverterState extends State<CurrencyConverter> {
                     currencyName: currencies![selectedCurrency] ?? "",
                     isSelected: selectedField == 0,
                     value: usdValue,
-                    onSelectCurrency: () =>
-                        showCurreciesBottomSheet(context, 0),
+                    onSelectCurrency: () => showCurreciesBottomSheet(context, 0),
                     onSelectText: () {
                       if (selectedField != 0) {
                         usdValue = '1';
@@ -157,8 +147,7 @@ class _CurrencyConverterState extends State<CurrencyConverter> {
                     currencyName: currencies![selectedCurrencyTo] ?? "",
                     isSelected: selectedField == 1,
                     value: pkrValue,
-                    onSelectCurrency: () =>
-                        showCurreciesBottomSheet(context, 1),
+                    onSelectCurrency: () => showCurreciesBottomSheet(context, 1),
                     onSelectText: () {
                       if (selectedField != 1) {
                         pkrValue = '1';
@@ -223,12 +212,11 @@ class _CurrencyConverterState extends State<CurrencyConverter> {
                   const Spacer(),
                   Row(
                     children: [
-                      Text(
-                        "Exchange rates according to date $date",
-                        style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.white38,
-                            decoration: TextDecoration.underline),
+                      Expanded(
+                        child: Text(
+                          "Exchange rates according to date $date",
+                          style: const TextStyle(fontSize: 15, color: Colors.white38, decoration: TextDecoration.underline),
+                        ),
                       ),
                       const SizedBox(
                         width: 5,
@@ -300,7 +288,9 @@ class _CurrencyConverterState extends State<CurrencyConverter> {
                       ),
                       Column(children: [
                         OutlinedButton(
-                            // style: ButtonStyle(fixedSize: Size(5, 20)),
+                            style: ButtonStyle(
+                              fixedSize: MaterialStateProperty.all(const Size(5, 20)),
+                            ),
                             onPressed: () {
                               if (selectedField == 0) {
                                 usdValue = '1';
@@ -319,9 +309,7 @@ class _CurrencyConverterState extends State<CurrencyConverter> {
                                 if (usdValue.length == 1) {
                                   usdValue = '1';
                                 } else {
-                                  List<String> temp = List<String>.generate(
-                                      usdValue.length,
-                                      (index) => (usdValue[index]));
+                                  List<String> temp = List<String>.generate(usdValue.length, (index) => (usdValue[index]));
                                   for (int i = 0; i < (temp.length) - 1; i++) {
                                     if (i == 0) {
                                       usdValue = temp[i].toString();
@@ -334,9 +322,7 @@ class _CurrencyConverterState extends State<CurrencyConverter> {
                                 if (pkrValue.length == 1) {
                                   pkrValue = '1';
                                 } else {
-                                  List<String> temp = List<String>.generate(
-                                      pkrValue.length,
-                                      (index) => (pkrValue[index]));
+                                  List<String> temp = List<String>.generate(pkrValue.length, (index) => (pkrValue[index]));
                                   for (int i = 0; i < (temp.length) - 1; i++) {
                                     if (i == 0) {
                                       pkrValue = temp[i].toString();
@@ -375,16 +361,13 @@ class _CurrencyConverterState extends State<CurrencyConverter> {
     );
   }
 
-  Future<T?> showCurreciesBottomSheet<T>(
-      BuildContext context, int sheetForText) {
+  Future<T?> showCurreciesBottomSheet<T>(BuildContext context, int sheetForText) {
     return showModalBottomSheet<T>(
         elevation: 50.0,
         isDismissible: true,
         backgroundColor: Colors.transparent,
-        constraints:
-            BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),
-        shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+        constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
         context: context,
         builder: (context) {
           return MyCurrenciesBottomSheet(
