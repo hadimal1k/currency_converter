@@ -1,11 +1,19 @@
 import 'package:animated_splash_screen/animated_splash_screen.dart';
 import "package:flutter/material.dart";
 import 'package:medory/main.dart';
+import 'package:medory/widgets/terms_and_conditions.dart';
 
 class Splash extends StatelessWidget {
   Splash({super.key});
 
-  Future<void> waitAndPushRoute(BuildContext context) async {}
+  Future<void> waitAndPushRoute(BuildContext context) async {
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+      return TermsAndConditions(
+        termAndConditionItems: [],
+        title: "",
+      );
+    }));
+  }
 
   @override
   Widget build(context) {
