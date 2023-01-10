@@ -11,10 +11,6 @@ class TermsAndConditionListItem {
   });
 }
 
-void loadData() {
-  //TermsAndConditionListItem(icon: icon, message: message)
-}
-
 class TermsAndConditions extends StatelessWidget {
   final String title;
   final List<TermsAndConditionListItem> termAndConditionItems;
@@ -27,17 +23,15 @@ class TermsAndConditions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: Column(
-          children: [
-            for (int i = 0; i < termAndConditionItems.length; i++)
-              _TermsAndConditionListItemWidget(
-                termsAndConditionListItem: termAndConditionItems[i],
-              )
-          ],
-        ),
+    return SingleChildScrollView(
+      scrollDirection: Axis.vertical,
+      child: Column(
+        children: [
+          for (int i = 0; i < termAndConditionItems.length; i++)
+            _TermsAndConditionListItemWidget(
+              termsAndConditionListItem: termAndConditionItems[i],
+            )
+        ],
       ),
     );
   }
@@ -46,13 +40,15 @@ class TermsAndConditions extends StatelessWidget {
 class _TermsAndConditionListItemWidget extends StatelessWidget {
   final TermsAndConditionListItem termsAndConditionListItem;
 
-  const _TermsAndConditionListItemWidget(
-      {super.key, required this.termsAndConditionListItem});
+  const _TermsAndConditionListItemWidget({required this.termsAndConditionListItem});
 
   @override
   Widget build(BuildContext context) {
     return Row(
-      children: [],
+      children: [
+        Icon(termsAndConditionListItem.icon),
+        Text(termsAndConditionListItem.message),
+      ],
     );
   }
 }

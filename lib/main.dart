@@ -15,22 +15,23 @@ class MyApp extends StatelessWidget {
     /// height * 9 /16 = width
 
     return MaterialApp(
-        title: 'Medory',
-        builder: (context, child) {
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              return SizedBox(
-                width: constraints.biggest.height * 9 / 16,
-                height: constraints.biggest.height,
-                child: child,
-              );
-            },
-          );
-        },
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        home: Splash());
+      title: 'Medory',
+      builder: (context, child) {
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            return SizedBox(
+              width: constraints.biggest.height * 9 / 16,
+              height: constraints.biggest.height,
+              child: child,
+            );
+          },
+        );
+      },
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: Splash(),
+    );
   }
 }
 

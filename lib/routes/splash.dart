@@ -4,13 +4,17 @@ import 'package:medory/main.dart';
 import 'package:medory/widgets/terms_and_conditions.dart';
 
 class Splash extends StatelessWidget {
-  Splash({super.key});
+  const Splash({super.key});
 
   Future<void> waitAndPushRoute(BuildContext context) async {
-    Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+    await Future.delayed(Duration(seconds: 2));
+    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) {
       return TermsAndConditions(
-        termAndConditionItems: [],
-        title: "",
+        termAndConditionItems: [
+          TermsAndConditionListItem(icon: Icons.dangerous, message: "This is item 1"),
+          TermsAndConditionListItem(icon: Icons.dangerous, message: "This is item 1"),
+        ],
+        title: "Some title",
       );
     }));
   }
@@ -25,7 +29,7 @@ class Splash extends StatelessWidget {
           height: 635,
           color: Colors.white,
           child: Center(
-            child: Image.asset('assets/images/logo.jpg'),
+            child: Image.asset('assets/images/medory_logo.png'),
           ),
         ),
         nextScreen: const MyHomePage(
