@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:medory/widgets/splash.dart';
+import 'package:medory/routes/splash.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,22 +15,23 @@ class MyApp extends StatelessWidget {
     /// height * 9 /16 = width
 
     return MaterialApp(
-        title: 'Medory',
-        builder: (context, child) {
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              return SizedBox(
+      title: 'Medory',
+      builder: (context, child) {
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            return Center(
+              child: SizedBox(
                 width: constraints.biggest.height * 9 / 16,
                 height: constraints.biggest.height,
                 child: child,
-              );
-            },
-          );
-        },
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        home: Splash());
+              ),
+            );
+          },
+        );
+      },
+      theme: ThemeData(primarySwatch: Colors.blue, fontFamily: "DMSans"),
+      home: Splash(),
+    );
   }
 }
 

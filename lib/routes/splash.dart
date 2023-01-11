@@ -1,17 +1,16 @@
 import 'package:animated_splash_screen/animated_splash_screen.dart';
 import "package:flutter/material.dart";
 import 'package:medory/main.dart';
+import 'package:medory/routes/termsandcondition.dart';
 import 'package:medory/widgets/terms_and_conditions.dart';
 
 class Splash extends StatelessWidget {
   Splash({super.key});
 
   Future<void> waitAndPushRoute(BuildContext context) async {
-    Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-      return TermsAndConditions(
-        termAndConditionItems: [],
-        title: "",
-      );
+    await Future.delayed(Duration(seconds: 2));
+    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) {
+      return TermsAndConditionRoute();
     }));
   }
 
@@ -25,7 +24,7 @@ class Splash extends StatelessWidget {
           height: 635,
           color: Colors.white,
           child: Center(
-            child: Image.asset('assets/images/logo.jpg'),
+            child: Image.asset('assets/images/medory_logo.png'),
           ),
         ),
         nextScreen: const MyHomePage(
