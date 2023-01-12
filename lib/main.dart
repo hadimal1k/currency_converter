@@ -21,8 +21,8 @@ class MyApp extends StatelessWidget {
           builder: (context, constraints) {
             return Center(
               child: SizedBox(
-                width: constraints.biggest.height * 9 / 16,
-                height: constraints.biggest.height,
+                width: 375, //constraints.biggest.height * 9 / 16,
+                height: 667, //constraints.biggest.height,
                 child: child,
               ),
             );
